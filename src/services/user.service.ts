@@ -1,5 +1,8 @@
 import prisma from "../database/prisma-connection";
-import { IUserCreateRequest } from "../interface/user/user.request";
+import {
+  IUserCreateRequest,
+  IUserUpdateRequest,
+} from "../interface/user/user.request";
 
 export class UserService {
   async createUser({ email, name }: IUserCreateRequest) {
@@ -62,7 +65,40 @@ export class UserService {
     }
   }
 
-  async updateUser() {}
+  async updateUser(id: string, { email, name }: IUserUpdateRequest) {
+    try {
+      const userExist = await prisma.user.findUnique({
+        where: { id: parseInt(id) },
+      });
+
+      if (!userExist) {
+        return {
+          message: "User not found",
+          status: 404,
+        };
+      }
+
+      const userUpdate = await prisma.user.update({
+        where: { id: parseInt(id) },
+        data: {
+          email: email,
+          name: name,
+        },
+      });
+
+      return {
+        message: "User updated successfully",
+        userUpdated: userUpdate,
+        status: 200,
+      };
+    } catch (error) {
+      return {
+        message: "Error updating user",
+        status: 500,
+        error: error instanceof Error ? error.message : "Unknown error",
+      };
+    }
+  }
 
   async deleteUser(id: string) {
     try {

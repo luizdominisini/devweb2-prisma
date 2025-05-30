@@ -1,5 +1,8 @@
 import { Request, Response, Router } from "express";
-import { IUserCreateRequest } from "../../interface/user/user.request";
+import {
+  IUserCreateRequest,
+  IUserUpdateRequest,
+} from "../../interface/user/user.request";
 import { UserService } from "../../services/user.service";
 
 const routerUser = Router();
@@ -42,8 +45,21 @@ routerUser.get("/list", async (_req: Request, res: Response) => {
   });
 });
 
-routerUser.put("/update", (_req: Request, _res: Response) => {
-  return user_service.updateUser();
+routerUser.put("/update/:id", async (req: Request, res: Response) => {
+  const userBody: IUserUpdateRequest = req.body;
+  const userUpdated = await user_service.updateUser(req.params.id, userBody);
+
+  if (userUpdated.error) {
+    res.status(userUpdated.status).json({
+      message: userUpdated.message,
+      error: userUpdated.error,
+    });
+  }
+
+  res.status(userUpdated.status).json({
+    message: userUpdated.message,
+    userUpdated: userUpdated.userUpdated,
+  });
 });
 
 routerUser.delete("/delete/:id", async (req: Request, res: Response) => {
