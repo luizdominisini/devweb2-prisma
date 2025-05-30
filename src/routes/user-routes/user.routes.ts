@@ -46,8 +46,19 @@ routerUser.put("/update", (_req: Request, _res: Response) => {
   return user_service.updateUser();
 });
 
-routerUser.delete("/delete", (_req: Request, _res: Response) => {
-  return user_service.deleteUser();
+routerUser.delete("/delete/:id", async (req: Request, res: Response) => {
+  const userDeleted = await user_service.deleteUser(req.params.id);
+  if (userDeleted.error) {
+    res.status(userDeleted.status).json({
+      message: userDeleted.message,
+      error: userDeleted.error,
+    });
+  }
+
+  res.status(userDeleted.status).json({
+    message: userDeleted.message,
+    userDeleted: userDeleted.deletedUser,
+  });
 });
 
 export default routerUser;

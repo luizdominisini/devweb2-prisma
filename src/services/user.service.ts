@@ -64,5 +64,30 @@ export class UserService {
 
   async updateUser() {}
 
-  async deleteUser() {}
+  async deleteUser(id: string) {
+    try {
+      const userDelete = await prisma.user.delete({
+        where: { id: parseInt(id) },
+      });
+
+      if (!userDelete) {
+        return {
+          message: "User not found",
+          status: 404,
+        };
+      }
+
+      return {
+        message: "User deleted successfully",
+        deletedUser: userDelete,
+        status: 200,
+      };
+    } catch (error) {
+      return {
+        message: "Error deleting user",
+        status: 500,
+        error: error instanceof Error ? error.message : "Unknown error",
+      };
+    }
+  }
 }
