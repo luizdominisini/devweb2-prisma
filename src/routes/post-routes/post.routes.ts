@@ -1,42 +1,39 @@
 import { Request, Response, Router } from "express";
-import { IPostCreateRequest } from "../../interface/post/post.request";
+import {
+  IPostCreateRequest,
+  IPostUpdateRequest,
+} from "../../interface/post/post.request";
 import { PostService } from "../../services/post.service";
 
 const routerPost = Router();
 const post_service = new PostService();
 
 routerPost.get("/", (_req: Request, res: Response) => {
-  res.json({ message: "Post route is working!!!!!!!!!!" });
+  res.json({ message: "Post route is working!" });
 });
 
 routerPost.post("/create", async (req: Request, res: Response) => {
-  console.log(req.body);
   const postBody: IPostCreateRequest = req.body;
   const postCreated = await post_service.createPost(postBody);
-
-  if (postCreated.error) {
-    res.status(postCreated.status).json({
-      message: postCreated.message,
-      error: postCreated.error,
-    });
-  }
-
-  res.status(postCreated.status).json({
-    message: postCreated.message,
-    postCreated: postCreated.postCreated,
-  });
+  res.send(postCreated);
 });
 
-routerPost.put("/update", (_req: Request, _res: Response) => {
-  return post_service.updatePost();
+routerPost.get("/list", async (_req: Request, res: Response) => {
+  const posts = await post_service.listPost();
+  res.send(posts);
 });
 
-routerPost.get("/list", (_req: Request, _res: Response) => {
-  return post_service.listPost();
+routerPost.delete("/delete/:id", async (req: Request, res: Response) => {
+  const postId: string = req.params.id;
+  const postDeleted = await post_service.deletePost(postId);
+  res.send(postDeleted);
 });
 
-routerPost.delete("/delete", (_req: Request, _res: Response) => {
-  return post_service.deletePost();
+routerPost.put("/update/:id", async (req: Request, res: Response) => {
+  const postBody: IPostUpdateRequest = req.body;
+  const postId: string = req.params.id;
+  const postUpdated = await post_service.updatePost(postBody, postId);
+  res.send(postUpdated);
 });
 
 export default routerPost;

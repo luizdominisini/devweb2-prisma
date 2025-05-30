@@ -102,6 +102,28 @@ export class UserService {
 
   async deleteUser(id: string) {
     try {
+      const userExist = await prisma.user.findUnique({
+        where: { id: parseInt(id) },
+      });
+
+      if (!userExist) {
+        return {
+          message: "User not found",
+          status: 404,
+        };
+      }
+
+      const userContainsPosts = await prisma.post.findFirst({
+        where: { authorId: parseInt(id) },
+      });
+
+      if (userContainsPosts) {
+        return {
+          message: "User cannot be deleted because they have associated posts",
+          status: 400,
+        };
+      }
+
       const userDelete = await prisma.user.delete({
         where: { id: parseInt(id) },
       });
